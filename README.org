@@ -12,6 +12,14 @@
 
 * Functions
 - mmpolar.m
+
+  mmpolar(...), advanced version of =polar= .
+- gpos.m
+
+  [x,y]=gpos(hAxes), get the coordinate of current point of cursor in axes in real time.
+- plotcursor.m
+
+  plotcursor(...), add two horizontal line as cursor, display the cross point of the horizontal lines and plot lines, and you can drag them to the right position.
 * Scripts
 * References
 - [[https://cn.mathworks.com/matlabcentral/fileexchange/38855-comprehensive-polar-plots][Comprehensive Polar Plots - File Exchange - MATLAB Central]]
