@@ -2,9 +2,10 @@ function plotcursor(varargin)
 %place two cursor on axes to measure value of the plot
 % problem to be solved:
 % 1. 运行该函数之后，如果修改 axes 的 XLim，会导致 cursor 不工作，需要解决。
-% 2. 对于需要一次性对多个 axes 添加 cursor 的情况，暂时没考虑。
+% 2. 对于需要一次性对多个 axes 添加 cursor 的情况，暂时没考虑。（已解决）
 % 3. 可以针对 axes property 中的 UIcontextmenu 加点东西，来实现更多功能。
 % 4. 对于不连续函数，需要进行一些修正。本不应该显示坐标值。
+% 5. 初始默认在 cursor 在想要的位置，需要增加传参的个数。
 %
 % PLOTCURSOR(y)
 % PLOTCURSOR(x,y)
