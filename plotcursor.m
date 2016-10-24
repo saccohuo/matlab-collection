@@ -4,6 +4,7 @@ function plotcursor(varargin)
 % 1. 运行该函数之后，如果修改 axes 的 XLim，会导致 cursor 不工作，需要解决。
 % 2. 对于需要一次性对多个 axes 添加 cursor 的情况，暂时没考虑。
 % 3. 可以针对 axes property 中的 UIcontextmenu 加点东西，来实现更多功能。
+% 4. 对于不连续函数，需要进行一些修正。本不应该显示坐标值。
 %
 % PLOTCURSOR(y)
 % PLOTCURSOR(x,y)
@@ -55,13 +56,13 @@ end
 %--------------------------------------------------------------------------
 if nargi==1    % PLOTCURSOR(y) PLOTCURSOR(xycell)
     if isvector(varargin{1})
-        y = varargin{1};
-        x = 1:length(y);
+        y{1} = varargin{1};
+        x{1} = 1:length(y);
     elseif iscell(varargin{1})
         if(rem(length(varargin{1}),2) == 0)
-            for idx=1:length(varargin{1})
-                x(idx) = varargin{1}{2*idx-1};
-                y(idx) = varargin{1}{2*idx};
+            for idx=1:length(varargin{1})/2
+                x{idx} = varargin{1}{2*idx-1};
+                y{idx} = varargin{1}{2*idx};
             end
         else
             error('xycell 中的参数个数应该是偶数');
@@ -77,17 +78,17 @@ if nargi==2    % PLOTCURSOR(x,y) PLOTCURSOR(hAxes,xycell)
     if isvector(varargin{1}) && ishandle(varargin{1}) && ...
             iscell(varargin{2}) % PLOTCURSOR(x,y)
         if(rem(length(varargin{2}),2) == 0)
-            for idx=1:length(varargin{2})
-                x(idx) = varargin{2}{2*idx-1};
-                y(idx) = varargin{2}{2*idx};
+            for idx=1:length(varargin{2})/2
+                x{idx} = varargin{2}{2*idx-1};
+                y{idx} = varargin{2}{2*idx};
             end
         else
             error('xycell 中的参数个数应该是偶数');
             return;
         end
     elseif isvector(varargin{1}) && isvector(varargin{2}) % PLOTCURSOR(hAxes,xycell)
-        x = varargin{1};
-        y = varargin{2};
+        x{1} = varargin{1};
+        y{1} = varargin{2};
     else
         error('参数类型错误');
         return;
@@ -99,9 +100,9 @@ if nargi==3    % PLOTCURSOR(hAxes,x,y) PLOTCURSOR(hFig,hAxes,xycell)
             isvector(varargin{2}) && ishandle(varargin{2}) && ...
             iscell(varargin{3}) % PLOTCURSOR(hFig,hAxes,xycell)
         if(rem(length(varargin{2}),2) == 0)
-            for idx=1:length(varargin{2})
-                x(idx) = varargin{2}{2*idx-1};
-                y(idx) = varargin{2}{2*idx};
+            for idx=1:length(varargin{2})/2
+                x{idx} = varargin{2}{2*idx-1};
+                y{idx} = varargin{2}{2*idx};
             end
         else
             error('xycell 中的参数个数应该是偶数');
@@ -109,8 +110,8 @@ if nargi==3    % PLOTCURSOR(hAxes,x,y) PLOTCURSOR(hFig,hAxes,xycell)
         end
     elseif isvector(varargin{1}) && ishandle(varargin{1}) && ...
             isvector(varargin{2}) && isvector(varargin{3}) % PLOTCURSOR(hAxes,x,y)
-        x = varargin{2};
-        y = varargin{3};
+        x{1} = varargin{2};
+        y{1} = varargin{3};
     else
         error('参数类型错误');
         return;
@@ -122,8 +123,8 @@ if nargi>=4 && rem(nargi,2)==0   % PLOTCURSOR(hFig,hAxes,x,y) PLOTCURSOR(x1,y1,x
             isvector(varargin{2}) && ishandle(varargin{2})
         if nargi==4
             if isvector(varargin{3}) && isvector(varargin{4}) % PLOTCURSOR(hFig,hAxes,x,y)
-                x = varargin{3};
-                y = varargin{4};
+                x{1} = varargin{3};
+                y{1} = varargin{4};
             else
                 error('参数类型错误');
                 return;
@@ -132,8 +133,8 @@ if nargi>=4 && rem(nargi,2)==0   % PLOTCURSOR(hFig,hAxes,x,y) PLOTCURSOR(x1,y1,x
             for idx=2:nargi/2
                 if isvector(varargin{2*idx-1}) && ...
                         isvector(varargin{2*idx})
-                    x(idx-1) = varargin{2*idx-1};
-                    y(idx-1) = varargin{2*idx};
+                    x{idx-1} = varargin{2*idx-1};
+                    y{idx-1} = varargin{2*idx};
                 else
                     error('参数类型错误');
                     return;
@@ -144,8 +145,8 @@ if nargi>=4 && rem(nargi,2)==0   % PLOTCURSOR(hFig,hAxes,x,y) PLOTCURSOR(x1,y1,x
         for idx=1:nargi/2
             if isvector(varargin{2*idx-1}) && ...
                     isvector(varargin{2*idx})
-                x(idx) = varargin{2*idx-1};
-                y(idx) = varargin{2*idx};
+                x{idx} = varargin{2*idx-1};
+                y{idx} = varargin{2*idx};
             else
                 error('参数类型错误');
                 return;
@@ -159,8 +160,8 @@ if nargi>=5 && rem(nargi,2)==1   % PLOTCURSOR(hAxes,x1,y1,x2,y2,...)
         for idx=1:(nargi-1)/2
             if isvector(varargin{2*idx}) && ...
                     isvector(varargin{2*idx+1})
-                x(idx) = varargin{2*idx};
-                y(idx) = varargin{2*idx+1};
+                x{idx} = varargin{2*idx};
+                y{idx} = varargin{2*idx+1};
             else
                 error('参数类型错误');
                 return;
@@ -183,16 +184,28 @@ rt.CurrentFigure.CurrentAxes = hAxes;
 % y = sin(2*pi*x);
 % plot(x,y,'-k','LineWidth',1);
 
-pp = interp1(x,y,'linear','pp');
-f=@(x)ppval(pp,x); % 通过一维线性插值得到交点纵坐标
+pp = {};
+numCurves = length(x);
+
+for idx=1:numCurves
+    pp{idx} = interp1(x{idx},y{idx},'linear','pp');
+    f=@(x)ppval(pp{idx},x); % 通过一维线性插值得到交点纵坐标
+    f
+    fs{idx} = func2str(f);
+    htext{idx}=text(zeros(1,2),zeros(1,2),''); % 显示交点的2个文本标签
+    set(htext{idx},'Color','red');
+    set(htext{idx},'HorizontalAlignment','right')
+end
 
 hline=line([1;1]*get(gca,'XLim'),get(gca,'YLim')'*[1,1],...
            'LineWidth',2,'ButtonDownFcn',@drag); % 2条可移动的竖线
-htext=text(zeros(1,2),zeros(1,2),''); % 显示交点的2个文本标签
 
-set([hline(1),htext(1)],'Color','red')
-set([hline(2),htext(2)],'Color','blue')
-set(htext(1),'HorizontalAlignment','right')
+set(hline(1),'Color','red');
+set(hline(2),'Color','blue');
+
+% set([hline(1),htext(1)],'Color','red')
+% set([hline(2),htext(2)],'Color','blue')
+% set(htext(1),'HorizontalAlignment','right')
 
 function drag(this,~)
     xlm=get(gca,'XLimMode'); % 保留 x 轴调整模式
@@ -205,25 +218,40 @@ function drag(this,~)
 
     function move(~,~)
         cp = get(gca,'CurrentPoint'); % 鼠标当前点
-        cx=cp(1);cy=f(cx); % 交点坐标 (cx,cy)
+        % 交点坐标 (cx,cy)
+        cx=cp(1);
+        % cy=[];
         cxlim = get(gca,'XLim');
-        cxmin = cxlim(1); cymin = f(cxmin);
-        cxmax = cxlim(2); cymax = f(cxmax);
+        cxmin = cxlim(1);
+        cxmax = cxlim(2);
+        for idx=1:numCurves
+            f = str2func(fs{idx});
+            cy(idx) = f(cx);
+            cymin(idx) = f(cxmin);
+            cymax(idx) = f(cxmax);
+        end
+        % cy=f(cx);
         if cx >= cxmin && cx <= cxmax
             set(this,'XData',[cx,cx]) % 改变竖线水平位置
                                       % 实时显示当前点
-            set(htext(this==hline),'Position',[cx,cy], ...
-                              'String',sprintf(' %.2f, %.2f ',cx, cy));
+            for idx=1:numCurves
+                set(htext{idx}(this==hline),'Position',[cx,cy(idx)], ...
+                                  'String',sprintf(' %.2f, %.2f ',cx, ...
+                                                   cy(idx)));
+            end
         elseif cx <= cxmin
             set(this,'XData',[cxmin,cxmin]) % 改变竖线水平位置
-            set(htext(this==hline),'Position',[cxmin,cymin], ...
-                              'String',sprintf(' %.2f, %.2f ',cxmin, cymin));
+            for idx=1:numCurves
+                set(htext{idx}(this==hline),'Position',[cxmin,cymin(idx)], ...
+                                  'String',sprintf(' %.2f, %.2f ',cxmin, cymin(idx)));
+            end
         else
             set(this,'XData',[cxmax,cxmax]) % 改变竖线水平位置
-            set(htext(this==hline),'Position',[cxmax,cymax], ...
-                              'String',sprintf(' %.2f, %.2f ',cxmax, cymax));
+            for idx=1:numCurves
+                set(htext{idx}(this==hline),'Position',[cxmax,cymax(idx)], ...
+                                  'String',sprintf(' %.2f, %.2f ',cxmax, cymax(idx)));
+            end
         end
-
     end
 
     function drop(~,~)
