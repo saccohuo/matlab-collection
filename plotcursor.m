@@ -37,8 +37,8 @@ function plotcursor(varargin)
 % disp(nargin);
 % return;
 nargi = nargin;
-if nargi>=2 && isscalar(varargin{1}) && ishandle(varargin{1})
-    if isscalar(varargin{2}) && ishandle(varargin{2})
+if nargi>=2 && isvector(varargin{1}) && ishandle(varargin{1})
+    if isvector(varargin{2}) && ishandle(varargin{2})
         hFig = varargin{1};
         hAxes = varargin{2};
     else
@@ -54,7 +54,7 @@ end
 % Consider input arguments                         Consider input arguments
 %--------------------------------------------------------------------------
 if nargi==1    % PLOTCURSOR(y) PLOTCURSOR(xycell)
-    if isscalar(varargin{1})
+    if isvector(varargin{1})
         y = varargin{1};
         x = 1:length(y);
     elseif iscell(varargin{1})
@@ -74,7 +74,7 @@ if nargi==1    % PLOTCURSOR(y) PLOTCURSOR(xycell)
 end
 
 if nargi==2    % PLOTCURSOR(x,y) PLOTCURSOR(hAxes,xycell)
-    if isscalar(varargin{1}) && ishandle(varargin{1}) && ...
+    if isvector(varargin{1}) && ishandle(varargin{1}) && ...
             iscell(varargin{2}) % PLOTCURSOR(x,y)
         if(rem(length(varargin{2}),2) == 0)
             for idx=1:length(varargin{2})
@@ -85,7 +85,7 @@ if nargi==2    % PLOTCURSOR(x,y) PLOTCURSOR(hAxes,xycell)
             error('xycell 中的参数个数应该是偶数');
             return;
         end
-    elseif isscalar(varargin{1}) && isscalar(varargin{2}) % PLOTCURSOR(hAxes,xycell)
+    elseif isvector(varargin{1}) && isvector(varargin{2}) % PLOTCURSOR(hAxes,xycell)
         x = varargin{1};
         y = varargin{2};
     else
@@ -95,8 +95,8 @@ if nargi==2    % PLOTCURSOR(x,y) PLOTCURSOR(hAxes,xycell)
 end
 
 if nargi==3    % PLOTCURSOR(hAxes,x,y) PLOTCURSOR(hFig,hAxes,xycell)
-    if isscalar(varargin{1}) && ishandle(varargin{1}) && ...
-            isscalar(varargin{2}) && ishandle(varargin{2}) && ...
+    if isvector(varargin{1}) && ishandle(varargin{1}) && ...
+            isvector(varargin{2}) && ishandle(varargin{2}) && ...
             iscell(varargin{3}) % PLOTCURSOR(hFig,hAxes,xycell)
         if(rem(length(varargin{2}),2) == 0)
             for idx=1:length(varargin{2})
@@ -107,8 +107,8 @@ if nargi==3    % PLOTCURSOR(hAxes,x,y) PLOTCURSOR(hFig,hAxes,xycell)
             error('xycell 中的参数个数应该是偶数');
             return;
         end
-    elseif isscalar(varargin{1}) && ishandle(varargin{1}) && ...
-            isscalar(varargin{2}) && isscalar(varargin{3}) % PLOTCURSOR(hAxes,x,y)
+    elseif isvector(varargin{1}) && ishandle(varargin{1}) && ...
+            isvector(varargin{2}) && isvector(varargin{3}) % PLOTCURSOR(hAxes,x,y)
         x = varargin{2};
         y = varargin{3};
     else
@@ -118,10 +118,10 @@ if nargi==3    % PLOTCURSOR(hAxes,x,y) PLOTCURSOR(hFig,hAxes,xycell)
 end
 
 if nargi>=4 && rem(nargi,2)==0   % PLOTCURSOR(hFig,hAxes,x,y) PLOTCURSOR(x1,y1,x2,y2,...) PLOTCURSOR(hFig,hAxes,x1,y1,x2,y2,...)
-    if isscalar(varargin{1}) && ishandle(varargin{1}) && ...
-            isscalar(varargin{2}) && ishandle(varargin{2})
+    if isvector(varargin{1}) && ishandle(varargin{1}) && ...
+            isvector(varargin{2}) && ishandle(varargin{2})
         if nargi==4
-            if isscalar(varargin{3}) && isscalar(varargin{4}) % PLOTCURSOR(hFig,hAxes,x,y)
+            if isvector(varargin{3}) && isvector(varargin{4}) % PLOTCURSOR(hFig,hAxes,x,y)
                 x = varargin{3};
                 y = varargin{4};
             else
@@ -130,8 +130,8 @@ if nargi>=4 && rem(nargi,2)==0   % PLOTCURSOR(hFig,hAxes,x,y) PLOTCURSOR(x1,y1,x
             end
         else % PLOTCURSOR(hFig,hAxes,x1,y1,x2,y2,...)
             for idx=2:nargi/2
-                if isscalar(varargin{2*idx-1}) && ...
-                        isscalar(varargin{2*idx})
+                if isvector(varargin{2*idx-1}) && ...
+                        isvector(varargin{2*idx})
                     x(idx-1) = varargin{2*idx-1};
                     y(idx-1) = varargin{2*idx};
                 else
@@ -142,8 +142,8 @@ if nargi>=4 && rem(nargi,2)==0   % PLOTCURSOR(hFig,hAxes,x,y) PLOTCURSOR(x1,y1,x
         end
     else % PLOTCURSOR(x1,y1,x2,y2,...)
         for idx=1:nargi/2
-            if isscalar(varargin{2*idx-1}) && ...
-                    isscalar(varargin{2*idx})
+            if isvector(varargin{2*idx-1}) && ...
+                    isvector(varargin{2*idx})
                 x(idx) = varargin{2*idx-1};
                 y(idx) = varargin{2*idx};
             else
@@ -155,10 +155,10 @@ if nargi>=4 && rem(nargi,2)==0   % PLOTCURSOR(hFig,hAxes,x,y) PLOTCURSOR(x1,y1,x
 end
 
 if nargi>=5 && rem(nargi,2)==1   % PLOTCURSOR(hAxes,x1,y1,x2,y2,...)
-    if isscalar(varargin{1}) && ishandle(varargin{1})
+    if isvector(varargin{1}) && ishandle(varargin{1})
         for idx=1:(nargi-1)/2
-            if isscalar(varargin{2*idx}) && ...
-                    isscalar(varargin{2*idx+1})
+            if isvector(varargin{2*idx}) && ...
+                    isvector(varargin{2*idx+1})
                 x(idx) = varargin{2*idx};
                 y(idx) = varargin{2*idx+1};
             else
