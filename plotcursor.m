@@ -38,6 +38,7 @@ function plotcursor(varargin)
 % disp(nargin);
 % return;
 nargi = nargin;
+% x={};
 if nargi>=2 && isvector(varargin{1}) && ishandle(varargin{1})
     if isvector(varargin{2}) && ishandle(varargin{2})
         hFig = varargin{1};
@@ -99,10 +100,10 @@ if nargi==3    % PLOTCURSOR(hAxes,x,y) PLOTCURSOR(hFig,hAxes,xycell)
     if isvector(varargin{1}) && ishandle(varargin{1}) && ...
             isvector(varargin{2}) && ishandle(varargin{2}) && ...
             iscell(varargin{3}) % PLOTCURSOR(hFig,hAxes,xycell)
-        if(rem(length(varargin{2}),2) == 0)
-            for idx=1:length(varargin{2})/2
-                x{idx} = varargin{2}{2*idx-1};
-                y{idx} = varargin{2}{2*idx};
+        if(rem(length(varargin{3}),2) == 0)
+            for idx=1:length(varargin{3})/2
+                x{idx} = varargin{3}{2*idx-1};
+                y{idx} = varargin{3}{2*idx};
             end
         else
             error('xycell 中的参数个数应该是偶数');
@@ -189,15 +190,16 @@ numCurves = length(x);
 
 for idx=1:numCurves
     pp{idx} = interp1(x{idx},y{idx},'linear','pp');
-    f=@(x)ppval(pp{idx},x); % 通过一维线性插值得到交点纵坐标
-    f
+    % f=@(x)ppval(pp{idx},x); % 通过一维线性插值得到交点纵坐标
+    f=@(x,tt)ppval(tt,x); % 通过一维线性插值得到交点纵坐标
     fs{idx} = func2str(f);
     htext{idx}=text(zeros(1,2),zeros(1,2),''); % 显示交点的2个文本标签
-    set(htext{idx},'Color','red');
-    set(htext{idx},'HorizontalAlignment','right')
+    set(htext{idx}(1),'Color','red');
+    set(htext{idx}(2),'Color','blue');
+    set(htext{idx}(1),'HorizontalAlignment','right')
 end
 
-hline=line([1;1]*get(gca,'XLim'),get(gca,'YLim')'*[1,1],...
+hline=line([1;1]*get(hAxes,'XLim'),get(hAxes,'YLim')'*[1,1],...
            'LineWidth',2,'ButtonDownFcn',@drag); % 2条可移动的竖线
 
 set(hline(1),'Color','red');
@@ -226,9 +228,9 @@ function drag(this,~)
         cxmax = cxlim(2);
         for idx=1:numCurves
             f = str2func(fs{idx});
-            cy(idx) = f(cx);
-            cymin(idx) = f(cxmin);
-            cymax(idx) = f(cxmax);
+            cy(idx) = f(cx,pp{idx});
+            cymin(idx) = f(cxmin,pp{idx});
+            cymax(idx) = f(cxmax,pp{idx});
         end
         % cy=f(cx);
         if cx >= cxmin && cx <= cxmax
