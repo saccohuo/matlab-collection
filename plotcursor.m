@@ -21,8 +21,12 @@ function plotcursor(varargin)
 % hAxes: handle of axes to be modified
 % x: vector data of x axis in the plot
 % y: vector data of y axis in the plot
-
-% Sacco Huo, BIT, NUAA
+% -----------------------------------------------------------
+% Direction:
+% plotcursor(fig2, axes_el_rect, theta_pol, pat_rect(:, idx));
+%
+%
+% Sacco Huo, BIT, Beijing, CHINA.
 % shuaike945@gmail.com
 % Mastering MATLAB R2016a
 % 2016-10-23
@@ -54,7 +58,7 @@ if nargi==1    % PLOTCURSOR(y) PLOTCURSOR(xycell)
         y = varargin{1};
         x = 1:length(y);
     elseif iscell(varargin{1})
-        if(rem(length(varargin),2) == 0)
+        if(rem(length(varargin{1}),2) == 0)
             for idx=1:length(varargin{1})
                 x(idx) = varargin{1}{2*idx-1};
                 y(idx) = varargin{1}{2*idx};
@@ -64,21 +68,109 @@ if nargi==1    % PLOTCURSOR(y) PLOTCURSOR(xycell)
             return;
         end
     else
-        error('一个参数作为输入是，要么是y值，要么是xycell');
+        error('参数类型错误');
         return;
     end
 end
 
-if nargi==2    % PLOTCURSOR(x,y)
-    x = varargin{1};
-    y = varargin{2};
+if nargi==2    % PLOTCURSOR(x,y) PLOTCURSOR(hAxes,xycell)
+    if isscalar(varargin{1}) && ishandle(varargin{1}) && ...
+            iscell(varargin{2}) % PLOTCURSOR(x,y)
+        if(rem(length(varargin{2}),2) == 0)
+            for idx=1:length(varargin{2})
+                x(idx) = varargin{2}{2*idx-1};
+                y(idx) = varargin{2}{2*idx};
+            end
+        else
+            error('xycell 中的参数个数应该是偶数');
+            return;
+        end
+    elseif isscalar(varargin{1}) && isscalar(varargin{2}) % PLOTCURSOR(hAxes,xycell)
+        x = varargin{1};
+        y = varargin{2};
+    else
+        error('参数类型错误');
+        return;
+    end
 end
 
-if nargi==3    % PLOTCURSOR(hAxes,x,y)
-    x = varargin{2};
-    y = varargin{3};
+if nargi==3    % PLOTCURSOR(hAxes,x,y) PLOTCURSOR(hFig,hAxes,xycell)
+    if isscalar(varargin{1}) && ishandle(varargin{1}) && ...
+            isscalar(varargin{2}) && ishandle(varargin{2}) && ...
+            iscell(varargin{3}) % PLOTCURSOR(hFig,hAxes,xycell)
+        if(rem(length(varargin{2}),2) == 0)
+            for idx=1:length(varargin{2})
+                x(idx) = varargin{2}{2*idx-1};
+                y(idx) = varargin{2}{2*idx};
+            end
+        else
+            error('xycell 中的参数个数应该是偶数');
+            return;
+        end
+    elseif isscalar(varargin{1}) && ishandle(varargin{1}) && ...
+            isscalar(varargin{2}) && isscalar(varargin{3}) % PLOTCURSOR(hAxes,x,y)
+        x = varargin{2};
+        y = varargin{3};
+    else
+        error('参数类型错误');
+        return;
+    end
 end
 
+if nargi>=4 && rem(nargi,2)==0   % PLOTCURSOR(hFig,hAxes,x,y) PLOTCURSOR(x1,y1,x2,y2,...) PLOTCURSOR(hFig,hAxes,x1,y1,x2,y2,...)
+    if isscalar(varargin{1}) && ishandle(varargin{1}) && ...
+            isscalar(varargin{2}) && ishandle(varargin{2})
+        if nargi==4
+            if isscalar(varargin{3}) && isscalar(varargin{4}) % PLOTCURSOR(hFig,hAxes,x,y)
+                x = varargin{3};
+                y = varargin{4};
+            else
+                error('参数类型错误');
+                return;
+            end
+        else % PLOTCURSOR(hFig,hAxes,x1,y1,x2,y2,...)
+            for idx=2:nargi/2
+                if isscalar(varargin{2*idx-1}) && ...
+                        isscalar(varargin{2*idx})
+                    x(idx-1) = varargin{2*idx-1};
+                    y(idx-1) = varargin{2*idx};
+                else
+                    error('参数类型错误');
+                    return;
+                end
+            end
+        end
+    else % PLOTCURSOR(x1,y1,x2,y2,...)
+        for idx=1:nargi/2
+            if isscalar(varargin{2*idx-1}) && ...
+                    isscalar(varargin{2*idx})
+                x(idx) = varargin{2*idx-1};
+                y(idx) = varargin{2*idx};
+            else
+                error('参数类型错误');
+                return;
+            end
+        end
+    end
+end
+
+if nargi>=5 && rem(nargi,2)==1   % PLOTCURSOR(hAxes,x1,y1,x2,y2,...)
+    if isscalar(varargin{1}) && ishandle(varargin{1})
+        for idx=1:(nargi-1)/2
+            if isscalar(varargin{2*idx}) && ...
+                    isscalar(varargin{2*idx+1})
+                x(idx) = varargin{2*idx};
+                y(idx) = varargin{2*idx+1};
+            else
+                error('参数类型错误');
+                return;
+            end
+        end
+    else
+        error('参数类型错误');
+        return;
+    end
+end
 
 %--------------------------------------------------------------------------
 % Cursors Process                                           Cursors Process
